@@ -19,6 +19,7 @@
 		delay: 0,
 		margin: 0,
 		orientation: 'vertical',
+		selected: 0,
 		slider: false,
 		snap: false
 	};
@@ -185,6 +186,8 @@
 						event.preventDefault();
 					}
 				});
+
+				this.select(this.options.selected);
 			}
 
 			if (this.options.touch) {
