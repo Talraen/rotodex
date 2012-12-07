@@ -39,6 +39,20 @@
 		},
 
 		move: function(fromIndex, toIndex) {
+			if (typeof(fromIndex) != 'number') {
+				fromIndex = this._getPanels().filter($(fromIndex)).index();
+				if (fromIndex == -1) {
+					return;
+				}
+			}
+
+			if (typeof(toIndex) != 'number') {
+				toIndex = this._getPanels().filter($(toIndex)).index();
+				if (toIndex == -1) {
+					return;
+				}
+			}
+
 			if (fromIndex == toIndex) {
 				return;
 			}
@@ -85,13 +99,20 @@
 		},
 
 		select: function(number) {
-			if (number < 0) {
-				number = 0;
-			} else if (number >= this.panels) {
-				number = this.panels - 1;
+			if (typeof(number) == 'number') {
+				if (number < 0) {
+					number = 0;
+				} else if (number >= this.panels) {
+					number = this.panels - 1;
+				}
+				this._scrollTo(this._getPanelPosition(number), true);
+				this.activePanel = number;
+			} else {
+				var index = this._getPanels().filter($(number)).index();
+				if (index != -1) {
+					this.select(index);
+				}
 			}
-			this._scrollTo(this._getPanelPosition(number), true);
-			this.activePanel = number;
 		},
 
 		_getPanelPosition: function(number) {
