@@ -138,6 +138,7 @@
 			this.lastTouch = 0;
 			this.panels = 0;
 			this.largest = 0;
+			this.sliderMax = 1000;
 
 			var $panels = this.element.children();
 			this.$list = $('<div class="rotodex-list"></div>').append($panels);
@@ -220,13 +221,13 @@
 
 				this.$slider.slider({
 					min: 0,
-					max: 1000,
-					value: this.options.orientation == 'horizontal' ? 0 : 1000,
+					max: this.sliderMax,
+					value: this.options.orientation == 'horizontal' ? 0 : this.sliderMax,
 					animate: 'fast',
 					orientation: this.options.orientation,
 					slide: function(event, ui) {
-						var multiplier = rotodex.options.orientation == 'horizontal' ? ui.value : 1000 - ui.value;
-						rotodex._scrollTo(rotodex._maxPosition() * multiplier / 1000);
+						var multiplier = rotodex.options.orientation == 'horizontal' ? ui.value : rotodex.sliderMax - ui.value;
+						rotodex._scrollTo(rotodex._maxPosition() * multiplier / rotodex.sliderMax);
 					}
 				});
 
@@ -457,9 +458,9 @@
 			}
 
 			if (this.options.slider && this.$slider) {
-				var position = this.scrollPosition / this._maxPosition() * 1000;
+				var position = this.scrollPosition / this._maxPosition() * this.sliderMax;
 				if (this.options.orientation != 'horizontal') {
-					position = 1000 - position;
+					position = this.sliderMax - position;
 				}
 				this.$slider.slider('value', position);
 			}
