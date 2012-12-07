@@ -24,8 +24,48 @@
 	};
 
 	$.Rotodex.prototype = {
+		add: function(panel, position) {
+			$panel = $(panel);
+			if (typeof(position) == 'number') {
+				var $nextPanel = $(this.$list.children()[position]);
+			}
+
+			if (typeof(position) == 'number' && $nextPanel.length > 0) {
+				$nextPanel.before($panel);
+			} else {
+				this.$list.append($panel);
+			}
+			this._registerPanel($panel[0]);
+		},
+
 		refresh: function() {
 			this._refreshSize();
+		},
+
+		remove: function(position) {
+			removed = this.$list.children()[position];
+			if (removed) {
+				this._deregisterPanel(removed);
+			}
+		},
+
+		select: function(number) {
+			if (number < 0) {
+				number = 0;
+			} else if (number >= this.panels) {
+				number = this.panels - 1;
+			}
+			this._scrollTo(this._getPanelPosition(number), true);
+			this.activePanel = number;
+		},
+
+		_getPanelPosition: function(number) {
+			var $panels = this._getPanels();
+			var scrollPosition = 0;
+			for (var i = 0; i < number; i++) {
+				scrollPosition += $.data($panels[i], 'rotodex-size');
+			}
+			return scrollPosition;
 		},
 
 		_collapsePanel: function(panel) {
@@ -40,13 +80,14 @@
 			this.activePanel = -1;
 			this.expandTimer = null;
 			this.lastTouch = 0;
+			this.panels = 0;
 
 			var $panels = this.element.children();
 			this.$list = $('<div class="rotodex-list"></div>').append($panels);
 			this.element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
 			this._updateScroll();
 
-			this.listSize = 0;
+			this._listSize(0);
 
 			var $panels = this._getPanels();
 			for (var i = 0, panels = $panels.length; i < panels; i++) {
@@ -62,7 +103,7 @@
 					}
 
 					if (rotodex.options.orientation == 'horizontal') {
-						delta = deltaX == 0 ? deltaY : deltaX;
+						delta = deltaX == 0 ? -deltaY : deltaX;
 					} else {
 						delta = -deltaY;
 					}
@@ -105,7 +146,7 @@
 				this._getPanels().click(function() {
 					var number = $(this).index();
 					if (rotodex.activePanel != number) {
-						rotodex._showPanel(number);
+						rotodex.select(number);
 						return false;
 					}
 				})
@@ -158,6 +199,26 @@
 			this._refreshSize();
 		},
 
+		_deregisterPanel: function(panel) {
+			var $panel = $(panel);
+			var panelPosition = this._getPanelPosition($panel.index());
+			this.panels--;
+
+			if (this.activePanel == $panel.index()) {
+				this.select(this.activePanel + 1);
+			}
+
+			var size = $.data(panel, 'rotodex-size');
+			this._listSize(this._listSize() - size);
+
+			$panel.remove();
+
+			if (panelPosition < this.scrollPosition) {
+				this.scrollPosition -= size;
+			}
+			this._updateScroll();
+		},
+
 		_expandPanel: function(panel) {
 			var $panel = $(panel);
 			var $elements = $panel.children('.rotodex-collapsible');
@@ -166,12 +227,14 @@
 			this.expandTimer = window.setTimeout(function() {
 				if (rotodex.options.animate) {
 					if (rotodex.options.orientation == 'horizontal') {
-						$elements.animate({width: 'toggle', duration: rotodex.options.animate});
+						$elements.animate({width: 'show', duration: rotodex.options.animate});
 					} else {
 						$elements.slideDown(rotodex.options.animate);
 					}
 					if (rotodex.options.snap) {
-						rotodex._showPanel($panel.index());
+						if ($panel.index() >= 0) {
+							rotodex.select($panel.index());
+						}
 					}
 				} else {
 					$elements.show();
@@ -192,6 +255,9 @@
 		},
 
 		_getPanelByPosition: function(position) {
+			if (!position) {
+				position = this.scrollPosition;
+			}
 			var $panels = this._getPanels();
 			for (var i = 0, panels = $panels.length; i < panels; i++) {
 				if (position <= 0) {
@@ -201,13 +267,24 @@
 			}
 		},
 
+		_listSize: function(listSize) {
+			if (typeof(listSize) == 'undefined') {
+				return this.listSize || 0;
+			} else {
+				this.listSize = listSize;
+				if (this.options.orientation == 'horizontal') {
+					this.$list.width(this.listSize + 1000); // Make the list wide enough to contain every element
+				}
+			}
+		},
+
 		_maxPosition: function() {
 			// Don't include the last element's size, since you don't want to scroll past it
 			var $panels = this._getPanels();
 			if ($panels.length < 2) {
 				return 0;
 			}
-			return this.listSize - $.data($panels[$panels.length - 1], 'rotodex-size');
+			return this._listSize() - $.data($panels[$panels.length - 1], 'rotodex-size');
 		},
 
 		_refreshSize: function() {
@@ -248,17 +325,20 @@
 			$panel.children().not($displayElements).addClass('rotodex-collapsible').hide();
 
 			// Store the size of the collapsed version for future use
-			var size = this.options.orientation == 'horizontal' ? $panel.outerWidth(true) : $panel.outerHeight() + parseInt($panel.css('margin-bottom'));
+			var size = parseInt(this.options.orientation == 'horizontal' ? $panel.outerWidth(true) : $panel.outerHeight() + parseInt($panel.css('margin-bottom')));
 			$.data(panel, 'rotodex-size', size);
-			this.listSize += size;
-
-			if (this.options.orientation == 'horizontal') {
-				this.$list.width(this.listSize + 1000); // Make the list wide enough to contain every element
-			}
+			this._listSize(this._listSize() + size);
 
 			if (this.activePanel == -1) {
-				this._showPanel(0);
+				this.select(0);
 			}
+
+			if (this._getPanelPosition($panel.index()) < this.scrollPosition) {
+				this.scrollPosition += size;
+			}
+			this._updateScroll();
+
+			this.panels++;
 		},
 
 		_scrollBy: function(delta) {
@@ -267,7 +347,7 @@
 			return this.scrollPosition - originalPosition;
 		},
 
-		_scrollTo: function(position, jump) {
+		_scrollTo: function(position, animate) {
 			if (position < 0) {
 				position = 0;
 			} else {
@@ -278,7 +358,7 @@
 			}
 			this.scrollPosition = position;
 
-			var activePanel = this._getPanelByPosition(this.scrollPosition);
+			var activePanel = this._getPanelByPosition();
 			if (this.activePanel != activePanel) {
 				this.activePanel = activePanel;
 
@@ -292,20 +372,10 @@
 				}
 			}
 
-			this._updateScroll(jump);
+			this._updateScroll(animate);
 		},
 
-		_showPanel: function(number) {
-			var $panels = this._getPanels();
-			var scrollPosition = 0;
-			for (var i = 0; i < number; i++) {
-				scrollPosition += $.data($panels[i], 'rotodex-size');
-			}
-			this._scrollTo(scrollPosition, true);
-			this.activePanel = number;
-		},
-
-		_updateScroll: function(jump) {
+		_updateScroll: function(animate) {
 			var margin;
 			if (this.options.center) {
 				margin = Math.floor((this.size - $.data(this._getActivePanel(), 'rotodex-active-size'))/ 2);
@@ -318,10 +388,11 @@
 
 			var css = {};
 			css[this.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (this.scrollPosition - margin)) + 'px';
-			if (jump && this.options.animate) {
+
+			if (animate && this.options.animate) {
 				this.$list.animate(css, {queue: false, duration: this.options.animate});
 			} else {
-				this.$list.css(css);
+				this.$list.stop(true).css(css);
 			}
 
 			if (this.options.slider && this.$slider) {
