@@ -131,6 +131,7 @@
 		_create: function(options) {
 			var rotodex = this;
 			this.options = $.extend(true, {}, $.Rotodex.settings, options);
+			this._refreshSize();
 
 			this.scrollPosition = 0;
 			this.activePanel = -1;
@@ -145,7 +146,7 @@
 			this.element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
 			this._updateScroll();
 
-			this._listSize(0);
+			this._listSize(1000); // Make sure there is enough space for the first element to fully render, before list size is known
 
 			var $panels = this._getPanels();
 			for (var i = 0, panels = $panels.length; i < panels; i++) {
@@ -377,7 +378,7 @@
 			}
 
 			// Record full size
-			var activeSize = this.options.orientation == 'horizontal' ? $panel.outerWidth() : $panel.outerHeight();
+			var activeSize = this.options.orientation == 'horizontal' ? $panel.outerWidth(true) : $panel.outerHeight(true);
 			$.data(panel, 'rotodex-active-size', activeSize);
 			if (activeSize > this.largest) {
 				this.largest = activeSize;
@@ -390,7 +391,6 @@
 			var size = parseInt(this.options.orientation == 'horizontal' ? $panel.outerWidth(true) : $panel.outerHeight() + parseInt($panel.css('margin-bottom')));
 			$.data(panel, 'rotodex-size', size);
 			this._listSize(this._listSize() + size);
-
 			if (this.activePanel == -1) {
 				this.select(0);
 			}
@@ -440,7 +440,8 @@
 		_updateScroll: function(animate) {
 			var margin;
 			if (this.options.center) {
-				margin = Math.floor((this.size - $.data(this._getActivePanel(), 'rotodex-active-size'))/ 2);
+				margin = Math.floor((this.size - $.data(this._getActivePanel(), 'rotodex-active-size')) / 2) || 0;
+
 				if (this.options.margin > margin) {
 					margin = this.options.margin;
 				}
