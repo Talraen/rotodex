@@ -11,13 +11,13 @@
 	};
 
 	$.Rotodex.settings = {
-		animate: {},
-		margin: 0,
+		animate: false,
+		center: false,
 		clickable: false,
-		enableMousewheel: true,
-		enableSlider: true,
-		enableTouch: true,
+		mousewheel: true,
+		touch: true,
 		delay: 0,
+		margin: 0,
 		orientation: 'vertical',
 		slider: false,
 		snap: false
@@ -35,6 +35,7 @@
 			this.activePanel = -1;
 			this.expandTimer = null;
 			this.lastTouch = 0;
+			this._refreshSize();
 
 			var $panels = this.element.children();
 			this.$list = $('<div class="rotodex-list"></div>').append($panels);
@@ -48,7 +49,7 @@
 				this._registerPanel($panels[i]);
 			}
 
-			if (this.options.enableMousewheel) {
+			if (this.options.mousewheel) {
 				var rotodex = this;
 				this.element.bind('mousewheel', function(event, delta, deltaX, deltaY) {
 					// TODO: Determine why this event is being called multiple times
@@ -82,7 +83,7 @@
 				});
 			}
 
-			if (this.options.enableTouch) {
+			if (this.options.touch) {
 				var rotodex = this;
 				this.element.bind('touchstart', function(event) {
 					event.preventDefault();
@@ -210,6 +211,10 @@
 			return this.listSize - $.data($panels[$panels.length - 1], 'rotodex-size');
 		},
 
+		_refreshSize: function() {
+			this.size = this.options.orientation == 'horizontal' ? this.element.width() : this.element.height();
+		},
+
 		_registerPanel: function(panel) {
 			var $panel = $(panel).addClass('rotodex-panel');
 
@@ -226,12 +231,15 @@
 				$displayElements = $panel.children().slice(0, 1);
 			}
 
-			// Remove all other elements from view
-			$panel.children().not($displayElements).addClass('rotodex-collapsible').hide();
-
 			if (this.options.orientation == 'horizontal') {
 				$panel.css('float', 'left');
 			}
+
+			// Record full size
+			$.data(panel, 'rotodex-active-size', this.options.orientation == 'horizontal' ? $panel.outerWidth() : $panel.outerHeight());
+
+			// Remove all other elements from view
+			$panel.children().not($displayElements).addClass('rotodex-collapsible').hide();
 
 			// Store the size of the collapsed version for future use
 			var size = this.options.orientation == 'horizontal' ? $panel.outerWidth(true) : $panel.outerHeight() + parseInt($panel.css('margin-bottom'));
@@ -263,22 +271,22 @@
 				}
 			}
 			this.scrollPosition = position;
-			this._updateScroll(jump);
 
 			var activePanel = this._getPanelByPosition(this.scrollPosition);
-			if (this.activePanel == activePanel) {
-				return;
-			}
-			this.activePanel = activePanel;
+			if (this.activePanel != activePanel) {
+				this.activePanel = activePanel;
 
-			var $panels = this._getPanels();
-			for (var i = 0, panels = $panels.length; i < panels; i++) {
-				if (i == this.activePanel) {
-					this._expandPanel($panels[i]);
-				} else {
-					this._collapsePanel($panels[i]);
+				var $panels = this._getPanels();
+				for (var i = 0, panels = $panels.length; i < panels; i++) {
+					if (i == this.activePanel) {
+						this._expandPanel($panels[i]);
+					} else {
+						this._collapsePanel($panels[i]);
+					}
 				}
 			}
+
+			this._updateScroll(jump);
 		},
 
 		_showPanel: function(number) {
@@ -292,15 +300,25 @@
 		},
 
 		_updateScroll: function(jump) {
+			var margin;
+			if (this.options.center) {
+				margin = Math.floor((this.size - $.data(this._getActivePanel(), 'rotodex-active-size'))/ 2);
+				if (this.options.margin > margin) {
+					margin = this.options.margin;
+				}
+			} else {
+				margin = this.options.margin;
+			}
+
 			var css = {};
-			css[this.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (this.scrollPosition - this.options.margin)) + 'px';
+			css[this.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (this.scrollPosition - margin)) + 'px';
 			if (jump && this.options.animate) {
 				this.$list.animate(css, {queue: false, duration: this.options.animate});
 			} else {
 				this.$list.css(css);
 			}
 
-			if (this.options.enableSlider && this.$slider) {
+			if (this.options.slider && this.$slider) {
 				var position = this.scrollPosition / this._maxPosition() * 1000;
 				if (this.options.orientation != 'horizontal') {
 					position = 1000 - position;
