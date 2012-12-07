@@ -43,9 +43,16 @@
 		},
 
 		remove: function(position) {
-			removed = this.$list.children()[position];
-			if (removed) {
-				this._deregisterPanel(removed);
+			if (typeof(position) == 'number') {
+				removed = this.$list.children()[position];
+				if (removed) {
+					this._deregisterPanel(removed);
+				}
+			} else {
+				var rotodex = this;
+				this._getPanels().filter($(position)).each(function() {
+					rotodex.remove($(this).index());
+				});
 			}
 		},
 
