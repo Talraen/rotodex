@@ -24,18 +24,22 @@
 	};
 
 	$.Rotodex.prototype = {
+		refresh: function() {
+			this._refreshSize();
+		},
+
 		_collapsePanel: function(panel) {
 			$(panel).children('.rotodex-collapsible').hide();
 		},
 
 		_create: function(options) {
+			var rotodex = this;
 			this.options = $.extend(true, {}, $.Rotodex.settings, options);
 
 			this.scrollPosition = 0;
 			this.activePanel = -1;
 			this.expandTimer = null;
 			this.lastTouch = 0;
-			this._refreshSize();
 
 			var $panels = this.element.children();
 			this.$list = $('<div class="rotodex-list"></div>').append($panels);
@@ -149,14 +153,9 @@
 				css[side] = 0;
 				css[anchor] = 0;
 				this.$slider.css(css);
-
-				if (this.options.orientation == 'horizontal') {
-					this.$slider.outerWidth(this.element.width(), true);
-				} else {
-					this.$slider.outerHeight(this.element.height(), true);
-				}
-
 			}
+
+			this._refreshSize();
 		},
 
 		_expandPanel: function(panel) {
@@ -213,6 +212,13 @@
 
 		_refreshSize: function() {
 			this.size = this.options.orientation == 'horizontal' ? this.element.width() : this.element.height();
+			if (this.options.slider && this.$slider) {
+				if (this.options.orientation == 'horizontal') {
+					this.$slider.outerWidth(this.element.width(), true);
+				} else {
+					this.$slider.outerHeight(this.element.height(), true);
+				}
+			}
 		},
 
 		_registerPanel: function(panel) {
@@ -329,15 +335,32 @@
 	};
 
 	$.fn.rotodex = function(options) {
-		this.each(function() {
-			var instance = $.data(this, 'rotodex');
-			if (instance) {
-				instance.option(options || {});
-				instance._init();
-			} else {
-				$.data(this, 'rotodex', new $.Rotodex(options, this));
-			}
-		});
+		if (typeof(options) == 'string') {
+			var args = Array.prototype.slice.call(arguments, 1);
+
+			this.each(function() {
+				var instance = $.data(this, 'rotodex');
+				if (!instance) {
+					console.log('Cannot call rotodex method ' + options + ' prior to initialization');
+					return;
+				}
+				if (!$.isFunction(instance[options]) || options.charAt(0) == '_') {
+					console.log('Method "' + options + '" not found in rotodex instance');
+					return;
+				}
+				instance[options].apply(instance, args);
+			})
+		} else {
+			this.each(function() {
+				var instance = $.data(this, 'rotodex');
+				if (instance) {
+					instance.option(options || {});
+					instance._init();
+				} else {
+					$.data(this, 'rotodex', new $.Rotodex(options, this));
+				}
+			});
+		}
 
 		return this;
 	}
