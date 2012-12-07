@@ -38,6 +38,34 @@
 			this._registerPanel($panel[0]);
 		},
 
+		move: function(fromIndex, toIndex) {
+			if (fromIndex == toIndex) {
+				return;
+			}
+
+			var $panels = this._getPanels();
+			var from = $panels[fromIndex];
+			var to = $panels[toIndex];
+
+			if (toIndex < fromIndex) {
+				$(to).before($(from));
+			} else {
+				$(to).after($(from));
+			}
+
+			if (fromIndex == this.activePanel) {
+				this.select(toIndex);
+			} else {
+				if (toIndex >= this.activePanel && fromIndex < this.activePanel) {
+					this.scrollPosition -= $.data(from, 'rotodex-size');
+					this._updateScroll();
+				} else if (toIndex <= this.activePanel && fromIndex > this.activePanel) {
+					this.scrollPosition += $.data(from, 'rotodex-size');
+					this._updateScroll();
+				}
+			}
+		},
+
 		refresh: function() {
 			this._refreshSize();
 		},
