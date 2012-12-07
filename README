@@ -1,0 +1,4 @@
+jQuery Rotodex
+==============
+
+The Rotodex is a list plugin similar in display to the jQuery UI Accordion widget, but with a concentration on quickly scrolling between items rather that requiring a click to open new items.  One item is always active and expanded, and will always appear in the same part of the list display.  The Rotodex can create both vertical and horizontal lists.
