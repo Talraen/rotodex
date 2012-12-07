@@ -137,6 +137,7 @@
 			this.expandTimer = null;
 			this.lastTouch = 0;
 			this.panels = 0;
+			this.largest = 0;
 
 			var $panels = this.element.children();
 			this.$list = $('<div class="rotodex-list"></div>').append($panels);
@@ -329,7 +330,7 @@
 			} else {
 				this.listSize = listSize;
 				if (this.options.orientation == 'horizontal') {
-					this.$list.width(this.listSize + 1000); // Make the list wide enough to contain every element
+					this.$list.width(this.listSize + this.largest); // Make the list wide enough to contain every element
 				}
 			}
 		},
@@ -375,7 +376,11 @@
 			}
 
 			// Record full size
-			$.data(panel, 'rotodex-active-size', this.options.orientation == 'horizontal' ? $panel.outerWidth() : $panel.outerHeight());
+			var activeSize = this.options.orientation == 'horizontal' ? $panel.outerWidth() : $panel.outerHeight();
+			$.data(panel, 'rotodex-active-size', activeSize);
+			if (activeSize > this.largest) {
+				this.largest = activeSize;
+			}
 
 			// Remove all other elements from view
 			$panel.children().not($displayElements).addClass('rotodex-collapsible').hide();
