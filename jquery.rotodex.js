@@ -125,10 +125,6 @@
 			return scrollPosition;
 		},
 
-		_collapsePanel: function(panel) {
-			$(panel).children('.rotodex-collapsible').hide();
-		},
-
 		_create: function(options) {
 			var rotodex = this;
 			this.options = $.extend(true, {}, $.Rotodex.settings, options);
@@ -147,7 +143,7 @@
 			this.element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
 			this._updateScroll();
 
-			this._listSize(1000); // Make sure there is enough space for the first element to fully render, before list size is known
+			this._listSize(this.options.orientation == 'horizontal' ? 1000 : 0); // Make sure there is enough space for the first element to fully render, before list size is known
 
 			var $panels = this._getPanels();
 			for (var i = 0, panels = $panels.length; i < panels; i++) {
@@ -395,6 +391,7 @@
 			$.data(panel, 'rotodex-size', size);
 			this._listSize(this._listSize() + size);
 			if (this.activePanel == -1) {
+				this._listSize(size); // Reset the size for the first element
 				this.select(0);
 			}
 
@@ -428,13 +425,8 @@
 				this.activePanel = activePanel;
 
 				var $panels = this._getPanels();
-				for (var i = 0, panels = $panels.length; i < panels; i++) {
-					if (i == this.activePanel) {
-						this._expandPanel($panels[i]);
-					} else {
-						this._collapsePanel($panels[i]);
-					}
-				}
+				$panels.find('.rotodex-collapsible').hide();
+				this._expandPanel($panels[this.activePanel]);
 			}
 
 			this._updateScroll(animate);
