@@ -446,7 +446,7 @@
 				this.activePanel = activePanel;
 
 				var $panels = this._getPanels();
-				$panels.find('.rotodex-collapsible').hide();
+				$panels.find('.rotodex-collapsible').stop().hide();
 				this._updateScroll(animate, true);
 				this._expandPanel($panels[this.activePanel]);
 			} else {
