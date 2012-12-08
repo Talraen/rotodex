@@ -14,14 +14,15 @@
 		animate: false,
 		center: false,
 		clickable: false,
-		mousewheel: true,
-		touch: true,
 		delay: 0,
+		hide: false,
 		margin: 0,
+		mousewheel: true,
 		orientation: 'vertical',
 		selected: 0,
 		slider: false,
-		snap: false
+		snap: false,
+		touch: true
 	};
 
 	$.Rotodex.prototype = {
@@ -279,7 +280,7 @@
 
 		_expandPanel: function(panel) {
 			var $panel = $(panel);
-			var $elements = $panel.children('.rotodex-collapsible');
+			var $elements = $panel.find('.rotodex-collapsible');
 			var rotodex = this;
 			window.clearTimeout(this.expandTimer);
 			this.expandTimer = window.setTimeout(function() {
@@ -384,7 +385,12 @@
 			}
 
 			// Remove all other elements from view
-			$panel.children().not($displayElements).addClass('rotodex-collapsible').hide();
+			var $collapsible = $panel.children().not($displayElements);
+			if (this.options.hide) {
+				console.log($panel.find(this.options.hide).length);
+				$collapsible = $collapsible.add($panel.find(this.options.hide));
+			}
+			$collapsible.addClass('rotodex-collapsible').hide();
 
 			// Store the size of the collapsed version for future use
 			var size = parseInt(this.options.orientation == 'horizontal' ? $panel.outerWidth(true) : $panel.outerHeight() + parseInt($panel.css('margin-bottom')));
