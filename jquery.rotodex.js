@@ -304,6 +304,12 @@
 					}
 				} else {
 					$elements.show();
+
+					if (rotodex.options.delay && rotodex.options.center) {
+						var css = {};
+						css[rotodex.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (rotodex.scrollPosition - rotodex.marginActive)) + 'px';
+						rotodex.$list.css(css);
+					}
 				}
 			}, this.options.delay)
 		},
@@ -467,7 +473,7 @@
 					this.marginActive = this.options.margin;
 				}
 
-				if (this.options.animate && changePanel) {
+				if ((this.options.animate || this.options.delay) && changePanel) {
 					margin = this.marginCollapsed;
 				} else {
 					margin = this.marginActive;
