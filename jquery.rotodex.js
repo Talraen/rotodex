@@ -296,12 +296,6 @@
 						css[rotodex.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (rotodex.scrollPosition - rotodex.marginActive)) + 'px';
 						rotodex.$list.animate(css, {duration: rotodex.options.animate});
 					}
-
-					if (rotodex.options.snap) {
-						if ($panel.index() >= 0) {
-							rotodex.select($panel.index());
-						}
-					}
 				} else {
 					$elements.show();
 
@@ -310,6 +304,10 @@
 						css[rotodex.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (rotodex.scrollPosition - rotodex.marginActive)) + 'px';
 						rotodex.$list.css(css);
 					}
+				}
+
+				if (rotodex.options.snap && $panel.index() >= 0) {
+					rotodex.select($panel.index());
 				}
 			}, this.options.delay)
 		},
