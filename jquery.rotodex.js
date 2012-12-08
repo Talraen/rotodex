@@ -290,6 +290,13 @@
 					} else {
 						$elements.slideDown(rotodex.options.animate);
 					}
+
+					if (rotodex.options.center) {
+						var css = {};
+						css[rotodex.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (rotodex.scrollPosition - rotodex.marginActive)) + 'px';
+						rotodex.$list.animate(css, {duration: rotodex.options.animate});
+					}
+
 					if (rotodex.options.snap) {
 						if ($panel.index() >= 0) {
 							rotodex.select($panel.index());
@@ -436,19 +443,34 @@
 
 				var $panels = this._getPanels();
 				$panels.find('.rotodex-collapsible').hide();
+				this._updateScroll(animate, true);
 				this._expandPanel($panels[this.activePanel]);
+			} else {
+				this._updateScroll(animate);
 			}
-
-			this._updateScroll(animate);
 		},
 
-		_updateScroll: function(animate) {
+		_updateScroll: function(animate, changePanel) {
 			var margin;
 			if (this.options.center) {
-				margin = Math.floor((this.size - $.data(this._getActivePanel(), 'rotodex-active-size')) / 2) || 0;
+				var activePanel = this._getActivePanel();
+				var collapsedSize = $.data(activePanel, 'rotodex-size');
+				var activeSize = $.data(activePanel, 'rotodex-active-size');
 
-				if (this.options.margin > margin) {
-					margin = this.options.margin;
+				this.marginCollapsed = Math.floor((this.size - collapsedSize) / 2) || 0;
+				if (this.options.margin > this.marginCollapsed) {
+					this.marginCollapsed = this.options.margin;
+				}
+
+				this.marginActive = Math.floor((this.size - activeSize) / 2) || 0;
+				if (this.options.margin > this.marginActive) {
+					this.marginActive = this.options.margin;
+				}
+
+				if (this.options.animate && changePanel) {
+					margin = this.marginCollapsed;
+				} else {
+					margin = this.marginActive;
 				}
 			} else {
 				margin = this.options.margin;
