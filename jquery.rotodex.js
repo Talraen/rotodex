@@ -364,7 +364,7 @@
 
 			// If a selector was provided, use it
 			if (selector) {
-				$displayElements = $panel.find(selector);
+				$displayElements = $panel.children(selector);
 			}
 
 			// If there is no selector, or no items fit it, use the first child
