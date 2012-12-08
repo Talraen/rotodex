@@ -389,9 +389,13 @@
 			// Store the size of the collapsed version for future use
 			var size = parseInt(this.options.orientation == 'horizontal' ? $panel.outerWidth(true) : $panel.outerHeight() + parseInt($panel.css('margin-bottom')));
 			$.data(panel, 'rotodex-size', size);
-			this._listSize(this._listSize() + size);
-			if (this.activePanel == -1) {
+			if (this.panels == 0) {
 				this._listSize(size); // Reset the size for the first element
+			} else {
+				this._listSize(this._listSize() + size);
+			}
+
+			if (this.activePanel == -1) {
 				this.select(0);
 			}
 
