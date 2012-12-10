@@ -5,7 +5,7 @@
 
 (function($) {
 	$.Rotodex = function(options, element) {
-		this.element = $(element);
+		this.$element = $(element);
 
 		this._create(options);
 	};
@@ -139,9 +139,9 @@
 			this.largest = 0;
 			this.sliderMax = 1000;
 
-			var $panels = this.element.children();
+			var $panels = this.$element.children();
 			this.$list = $('<div class="rotodex-list"></div>').append($panels);
-			this.element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
+			this.$element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
 			this._updateScroll();
 
 			this._listSize(this.options.orientation == 'horizontal' ? 1000 : 0); // Make sure there is enough space for the first element to fully render, before list size is known
@@ -153,7 +153,7 @@
 
 			if (this.options.mousewheel) {
 				var rotodex = this;
-				this.element.bind('mousewheel', function(event, delta, deltaX, deltaY) {
+				this.$element.bind('mousewheel', function(event, delta, deltaX, deltaY) {
 					// TODO: Determine why this event is being called multiple times
 					if (typeof(delta) == 'undefined') {
 						return; // This feature requires Brandon Aaron's mousewheel plugin
@@ -189,7 +189,7 @@
 
 			if (this.options.touch) {
 				var rotodex = this;
-				this.element.bind('touchstart', function(event) {
+				this.$element.bind('touchstart', function(event) {
 					event.preventDefault();
 					rotodex.lastTouch = rotodex.options.orientation == 'horizontal' ? event.originalEvent.touches[0].pageX : event.originalEvent.touches[0].pageY;
 				}).bind('touchmove', function(event) {
@@ -232,7 +232,7 @@
 					}
 				});
 
-				this.element.append(this.$slider);
+				this.$element.append(this.$slider);
 
 				// Add padding to outside element to make room for slider
 				var side, anchor, sliderSize;
@@ -245,7 +245,7 @@
 					anchor = 'top';
 					sliderSize = this.$slider.outerWidth(true);
 				}
-				this.element.css('padding-' + side, '' + (parseInt(this.element.css('padding-' + side)) + sliderSize) + 'px');
+				this.$element.css('padding-' + side, '' + (parseInt(this.$element.css('padding-' + side)) + sliderSize) + 'px');
 
 				// Create object containing CSS rules for slider
 				var css = {};
@@ -358,12 +358,12 @@
 		},
 
 		_refreshSize: function() {
-			this.size = this.options.orientation == 'horizontal' ? this.element.width() : this.element.height();
+			this.size = this.options.orientation == 'horizontal' ? this.$element.width() : this.$element.height();
 			if (this.options.slider && this.$slider) {
 				if (this.options.orientation == 'horizontal') {
-					this.$slider.outerWidth(this.element.width(), true);
+					this.$slider.outerWidth(this.$element.width(), true);
 				} else {
-					this.$slider.outerHeight(this.element.height(), true);
+					this.$slider.outerHeight(this.$element.height(), true);
 				}
 			}
 		},
