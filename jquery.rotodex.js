@@ -50,6 +50,11 @@
 			});
 		},
 
+		empty: function() {
+			this.$list.remove();
+			this._create(this.options);
+		},
+
 		move: function(fromIndex, toIndex) {
 			if (typeof(fromIndex) != 'number') {
 				fromIndex = this._getPanels().filter($(fromIndex)).index();
@@ -127,15 +132,6 @@
 			}
 		},
 
-		_getPanelPosition: function(number) {
-			var $panels = this._getPanels();
-			var scrollPosition = 0;
-			for (var i = 0; i < number; i++) {
-				scrollPosition += $.data($panels[i], 'rotodex-size');
-			}
-			return scrollPosition;
-		},
-
 		_create: function(options) {
 			var rotodex = this;
 			this.options = $.extend(true, {}, $.Rotodex.settings, options);
@@ -149,7 +145,7 @@
 			this.largest = 0;
 			this.sliderMax = 1000;
 
-			var $panels = this.$element.children();
+			var $panels = this.$element.children().not(this.$slider);
 			this.$list = $('<div class="rotodex-list"></div>').append($panels);
 			this.$element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
 			this._updateScroll();
@@ -221,7 +217,7 @@
 				})
 			}
 
-			if (this.options.slider) {
+			if (this.options.slider && !this.$slider) {
 				var rotodex = this;
 
 				this.$slider = $("<div>").addClass('rotodex-slider');
@@ -330,10 +326,6 @@
 			}
 		},
 
-		_getPanels: function() {
-			return this.$list.children();
-		},
-
 		_getPanelByPosition: function(position) {
 			if (!position) {
 				position = this.scrollPosition;
@@ -345,6 +337,19 @@
 				}
 				position -= $.data($panels[i], 'rotodex-size');
 			}
+		},
+
+		_getPanelPosition: function(number) {
+			var $panels = this._getPanels();
+			var scrollPosition = 0;
+			for (var i = 0; i < number; i++) {
+				scrollPosition += $.data($panels[i], 'rotodex-size');
+			}
+			return scrollPosition;
+		},
+
+		_getPanels: function() {
+			return this.$list.children();
 		},
 
 		_listSize: function(listSize) {
@@ -408,7 +413,6 @@
 			// Remove all other elements from view
 			var $collapsible = $panel.children().not($displayElements);
 			if (this.options.hide) {
-				console.log($panel.find(this.options.hide).length);
 				$collapsible = $collapsible.add($panel.find(this.options.hide));
 			}
 			$collapsible.addClass('rotodex-collapsible').hide();
