@@ -42,11 +42,8 @@
 
 		addMulti: function($panels, position) {
 			var rotodex = this;
-			$panels.each(function () {
-				rotodex.add($(this), position);
-				if (typeof(position) == 'number') {
-					position++;
-				}
+			$panels.each(function(index) {
+				rotodex.add($(this), position + index);
 			});
 		},
 
