@@ -99,16 +99,23 @@
 
 		option: function(key, value) {
 			var currentOptions = $.extend(true, {}, this.options);
-			var staticOptions = ['header', 'hide', 'orientation', 'selected', 'slider'];
+			var staticOptions = ['header', 'hide', 'orientation', 'slider'];
 
 			if ($.isPlainObject(key)) {
 				this.options = $.extend(true, this.options, key);
+
+				if (typeof(key.selected) != 'undefined') {
+					this.select(key.selected);
+				}
 			} else {
 				this.options[key] = value;
+
+				if (key == 'selected') {
+					this.select(value);
+				}
 			}
 
 			for (var i in staticOptions) {
-//				console.log(staticOptions[i], currentOptions[staticOptions[i]], this.options[staticOptions[i]]);
 				if (currentOptions[staticOptions[i]] != this.options[staticOptions[i]]) {
 					this.options[staticOptions[i]] = currentOptions[staticOptions[i]];
 					console.log('Option "' + staticOptions[i] + '" cannot be changed after instantiation');
