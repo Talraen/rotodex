@@ -97,6 +97,27 @@
 			}
 		},
 
+		option: function(key, value) {
+			var currentOptions = $.extend(true, {}, this.options);
+			var staticOptions = ['header', 'hide', 'orientation', 'selected', 'slider'];
+
+			if ($.isPlainObject(key)) {
+				this.options = $.extend(true, this.options, key);
+			} else {
+				this.options[key] = value;
+			}
+
+			for (var i in staticOptions) {
+//				console.log(staticOptions[i], currentOptions[staticOptions[i]], this.options[staticOptions[i]]);
+				if (currentOptions[staticOptions[i]] != this.options[staticOptions[i]]) {
+					this.options[staticOptions[i]] = currentOptions[staticOptions[i]];
+					console.log('Option "' + staticOptions[i] + '" cannot be changed after instantiation');
+				}
+			}
+
+			this._updateScroll(true);
+		},
+
 		refresh: function() {
 			this._refreshSize();
 		},
@@ -157,9 +178,8 @@
 				this._registerPanel($panels[i]);
 			}
 
-			if (this.options.mousewheel) {
-				var rotodex = this;
-				this.$element.bind('mousewheel', function(event, delta, deltaX, deltaY) {
+			this.$element.bind('mousewheel', function(event, delta, deltaX, deltaY) {
+				if (rotodex.options.mousewheel) {
 					// TODO: Determine why this event is being called multiple times
 					if (typeof(delta) == 'undefined') {
 						return; // This feature requires Brandon Aaron's mousewheel plugin
@@ -188,34 +208,32 @@
 						// Resume normal scrolling only if at the top or bottom of a vertical rotodex
 						event.preventDefault();
 					}
-				});
+				}
+			});
 
-				this.select(this.options.selected);
-			}
-
-			if (this.options.touch) {
-				var rotodex = this;
-				this.$element.bind('touchstart', function(event) {
+			this.$element.bind('touchstart', function(event) {
+				if (rotodex.options.touch) {
 					event.preventDefault();
 					rotodex.lastTouch = rotodex.options.orientation == 'horizontal' ? event.originalEvent.touches[0].pageX : event.originalEvent.touches[0].pageY;
-				}).bind('touchmove', function(event) {
+				}
+			}).bind('touchmove', function(event) {
+				if (rotodex.options.touch) {
 					event.preventDefault();
 					var touch = rotodex.options.orientation == 'horizontal' ? event.originalEvent.touches[0].pageX : event.originalEvent.touches[0].pageY;
 					rotodex._scrollBy(rotodex.lastTouch - touch);
 					rotodex.lastTouch = touch;
-				});
-			}
+				}
+			});
 
-			if (this.options.clickable) {
-				var rotodex = this;
-				this._getPanels().click(function() {
+			this._getPanels().click(function() {
+				if (rotodex.options.clickable) {
 					var number = $(this).index();
 					if (rotodex.activePanel != number) {
 						rotodex.select(number);
 						return false;
 					}
-				})
-			}
+				}
+			});
 
 			if (this.options.slider && !this.$slider) {
 				var rotodex = this;
@@ -261,6 +279,7 @@
 				this.$slider.css(css);
 			}
 
+			this.select(this.options.selected);
 			this._refreshSize();
 		},
 
