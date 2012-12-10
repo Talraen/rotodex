@@ -40,6 +40,16 @@
 			this._registerPanel($panel[0]);
 		},
 
+		addMulti: function($panels, position) {
+			var rotodex = this;
+			$panels.each(function () {
+				rotodex.add($(this), position);
+				if (typeof(position) == 'number') {
+					position++;
+				}
+			});
+		},
+
 		move: function(fromIndex, toIndex) {
 			if (typeof(fromIndex) != 'number') {
 				fromIndex = this._getPanels().filter($(fromIndex)).index();
