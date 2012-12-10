@@ -422,7 +422,7 @@
 
 			// If there is no selector, or no items fit it, use the first child
 			if ($displayElements.length == 0) {
-				$displayElements = $panel.children().slice(0, 1);
+				$displayElements = $panel.children().get(0);
 			}
 
 			if (this.options.orientation == 'horizontal') {
