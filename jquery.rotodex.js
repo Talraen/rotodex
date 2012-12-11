@@ -557,7 +557,6 @@
 				var instance = $.data(this, 'rotodex');
 				if (instance) {
 					instance.option(options || {});
-					instance._init();
 				} else {
 					$.data(this, 'rotodex', new $.Rotodex(options, this));
 				}
