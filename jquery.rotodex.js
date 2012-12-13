@@ -8,6 +8,10 @@
 		this.$element = $(element);
 
 		this._create(options);
+		this._bindEvents();
+		if (this.options.slider) {
+			this._buildSlider();
+		}
 	};
 
 	$.Rotodex.settings = {
@@ -157,31 +161,8 @@
 			}
 		},
 
-		_create: function(options) {
+		_bindEvents: function() {
 			var rotodex = this;
-			this.options = $.extend(true, {}, $.Rotodex.settings, options);
-			this._refreshSize();
-
-			this.scrollPosition = 0;
-			this.activePanel = -1;
-			this.expandTimer = null;
-			this.lastTouch = 0;
-			this.panels = 0;
-			this.largest = 0;
-			this.sliderMax = 1000;
-
-			var $panels = this.$element.children().not(this.$slider);
-			this.$list = $('<div class="rotodex-list"></div>').append($panels);
-			this.$element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
-			this._updateScroll();
-
-			this._listSize(this.options.orientation == 'horizontal' ? 1000 : 0); // Make sure there is enough space for the first element to fully render, before list size is known
-
-			var $panels = this._getPanels();
-			for (var i = 0, panels = $panels.length; i < panels; i++) {
-				this._registerPanel($panels[i]);
-			}
-
 			this.$element.bind('mousewheel', function(event, delta, deltaX, deltaY) {
 				if (rotodex.options.mousewheel) {
 					// TODO: Determine why this event is being called multiple times
@@ -208,7 +189,7 @@
 					}
 					current = $panels[number];
 
-					if (rotodex._scrollBy(delta * $.data(current, 'rotodex-size')) > 0 || rotodex.options.orientation == 'horizontal') {
+					if (rotodex._scrollBy(delta * $.data(current, 'rotodex-size')) != 0 || rotodex.options.orientation == 'horizontal') {
 						// Resume normal scrolling only if at the top or bottom of a vertical rotodex
 						event.preventDefault();
 					}
@@ -228,59 +209,75 @@
 					rotodex.lastTouch = touch;
 				}
 			});
+		},
 
-			this._getPanels().click(function() {
-				if (rotodex.options.clickable) {
-					var number = $(this).index();
-					if (rotodex.activePanel != number) {
-						rotodex.select(number);
-						return false;
-					}
+		_buildSlider: function() {
+			var rotodex = this;
+
+			this.$slider = $("<div>").addClass('rotodex-slider');
+
+			if (typeof(this.$slider.slider) != 'function') {
+				return; // This feature requires the jQuery UI plugin
+			}
+
+			this.$slider.slider({
+				min: 0,
+				max: this.sliderMax,
+				value: this.options.orientation == 'horizontal' ? 0 : this.sliderMax,
+				animate: 'fast',
+				orientation: this.options.orientation,
+				slide: function(event, ui) {
+					var multiplier = rotodex.options.orientation == 'horizontal' ? ui.value : rotodex.sliderMax - ui.value;
+					rotodex._scrollTo(rotodex._maxPosition() * multiplier / rotodex.sliderMax);
 				}
 			});
 
-			if (this.options.slider && !this.$slider) {
-				var rotodex = this;
+			this.$element.append(this.$slider);
 
-				this.$slider = $("<div>").addClass('rotodex-slider');
+			// Add padding to outside element to make room for slider
+			var side, anchor, sliderSize;
+			if (this.options.orientation == 'horizontal') {
+				side = this.options.slider == 'before' ? 'top' : 'bottom';
+				anchor = 'left';
+				sliderSize = this.$slider.outerHeight(true);
+			} else {
+				side = this.options.slider == 'before' ? 'left' : 'right';
+				anchor = 'top';
+				sliderSize = this.$slider.outerWidth(true);
+			}
+			this.$element.css('padding-' + side, '' + (parseInt(this.$element.css('padding-' + side)) + sliderSize) + 'px');
 
-				if (typeof(this.$slider.slider) != 'function') {
-					return; // This feature requires the jQuery UI plugin
-				}
+			// Create object containing CSS rules for slider
+			var css = {};
+			css.position = 'absolute';
+			css[side] = 0;
+			css[anchor] = 0;
+			this.$slider.css(css);
+		},
 
-				this.$slider.slider({
-					min: 0,
-					max: this.sliderMax,
-					value: this.options.orientation == 'horizontal' ? 0 : this.sliderMax,
-					animate: 'fast',
-					orientation: this.options.orientation,
-					slide: function(event, ui) {
-						var multiplier = rotodex.options.orientation == 'horizontal' ? ui.value : rotodex.sliderMax - ui.value;
-						rotodex._scrollTo(rotodex._maxPosition() * multiplier / rotodex.sliderMax);
-					}
-				});
+		_create: function(options) {
+			var rotodex = this;
+			this.options = $.extend(true, {}, $.Rotodex.settings, options);
+			this._refreshSize();
 
-				this.$element.append(this.$slider);
+			this.scrollPosition = 0;
+			this.activePanel = -1;
+			this.expandTimer = null;
+			this.lastTouch = 0;
+			this.panels = 0;
+			this.largest = 0;
+			this.sliderMax = 1000;
 
-				// Add padding to outside element to make room for slider
-				var side, anchor, sliderSize;
-				if (this.options.orientation == 'horizontal') {
-					side = this.options.slider == 'before' ? 'top' : 'bottom';
-					anchor = 'left';
-					sliderSize = this.$slider.outerHeight(true);
-				} else {
-					side = this.options.slider == 'before' ? 'left' : 'right';
-					anchor = 'top';
-					sliderSize = this.$slider.outerWidth(true);
-				}
-				this.$element.css('padding-' + side, '' + (parseInt(this.$element.css('padding-' + side)) + sliderSize) + 'px');
+			var $panels = this.$element.children().not(this.$slider);
+			this.$list = $('<div class="rotodex-list"></div>').append($panels);
+			this.$element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
+			this._updateScroll();
 
-				// Create object containing CSS rules for slider
-				var css = {};
-				css.position = 'absolute';
-				css[side] = 0;
-				css[anchor] = 0;
-				this.$slider.css(css);
+			this._listSize(this.options.orientation == 'horizontal' ? 1000 : 0); // Make sure there is enough space for the first element to fully render, before list size is known
+
+			var $panels = this._getPanels();
+			for (var i = 0, panels = $panels.length; i < panels; i++) {
+				this._registerPanel($panels[i]);
 			}
 
 			this.select(this.options.selected);
@@ -457,6 +454,17 @@
 				this.scrollPosition += size;
 			}
 			this._updateScroll();
+
+			var rotodex = this;
+			$panel.click(function() {
+				if (rotodex.options.clickable) {
+					var number = $(this).index();
+					if (rotodex.activePanel != number) {
+						rotodex.select(number);
+						return false;
+					}
+				}
+			});
 
 			this.panels++;
 		},
