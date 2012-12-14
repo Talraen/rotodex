@@ -300,42 +300,21 @@
 
 			if (panelPosition < this.scrollPosition) {
 				this.scrollPosition -= size;
+				this.activePanel--;
 			}
 			this._updateScroll();
 		},
 
 		_expandPanel: function(panel) {
-			var $panel = $(panel);
-			var $elements = $panel.find('.rotodex-collapsible');
 			var rotodex = this;
 			window.clearTimeout(this.expandTimer);
-			this.expandTimer = window.setTimeout(function() {
-				if (rotodex.options.animate) {
-					if (rotodex.options.orientation == 'horizontal') {
-						$elements.animate({width: 'show', duration: rotodex.options.animate});
-					} else {
-						$elements.slideDown(rotodex.options.animate);
-					}
-
-					if (rotodex.options.center) {
-						var css = {};
-						css[rotodex.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (rotodex.scrollPosition - rotodex.marginActive)) + 'px';
-						rotodex.$list.animate(css, {duration: rotodex.options.animate});
-					}
-				} else {
-					$elements.show();
-
-					if (rotodex.options.delay && rotodex.options.center) {
-						var css = {};
-						css[rotodex.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (rotodex.scrollPosition - rotodex.marginActive)) + 'px';
-						rotodex.$list.css(css);
-					}
-				}
-
-				if (rotodex.options.snap && $panel.index() >= 0) {
-					rotodex.select($panel.index());
-				}
-			}, this.options.delay)
+			if (this.options.delay) {
+				this.expandTimer = window.setTimeout(function() {
+					rotodex._showPanel(panel);
+				}, this.options.delay);
+			} else {
+				this._showPanel();
+			}
 		},
 
 		_getActivePanel: function() {
@@ -452,6 +431,7 @@
 
 			if (this._getPanelPosition($panel.index()) < this.scrollPosition) {
 				this.scrollPosition += size;
+				this.activePanel++;
 			}
 			this._updateScroll();
 
@@ -496,6 +476,37 @@
 				this._expandPanel($panels[this.activePanel]);
 			} else {
 				this._updateScroll(animate);
+			}
+		},
+
+		_showPanel: function(panel) {
+			var $panel = $(panel);
+			var $elements = $panel.find('.rotodex-collapsible');
+
+			if (this.options.animate) {
+				if (this.options.orientation == 'horizontal') {
+					$elements.animate({width: 'show', duration: this.options.animate});
+				} else {
+					$elements.slideDown(this.options.animate);
+				}
+
+				if (this.options.center) {
+					var css = {};
+					css[this.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (this.scrollPosition - this.marginActive)) + 'px';
+					this.$list.animate(css, {duration: this.options.animate});
+				}
+			} else {
+				$elements.show();
+
+				if (this.options.delay && this.options.center) {
+					var css = {};
+					css[this.options.orientation == 'horizontal' ? 'margin-left' : 'margin-top'] = '' + (-1 * (this.scrollPosition - this.marginActive)) + 'px';
+					this.$list.css(css);
+				}
+			}
+
+			if (this.options.snap && $panel.index() >= 0) {
+				this.select($panel.index());
 			}
 		},
 
