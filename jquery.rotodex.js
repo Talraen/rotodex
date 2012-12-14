@@ -1,5 +1,5 @@
 /**
-* jQuery Rotodex v1.0.0
+* jQuery Rotodex v1.0.1
 * Vertical list with single expanding element for jQuery
 */
 
