@@ -1,5 +1,5 @@
 /**
-* jQuery Rotodex v1.0.1
+* jQuery Rotodex v1.0.2
 * Vertical list with single expanding element for jQuery
 */
 
@@ -429,7 +429,7 @@
 				this.select(0);
 			}
 
-			if (this._getPanelPosition($panel.index()) < this.scrollPosition) {
+			if (this._getPanelPosition($panel.index()) <= this.scrollPosition) {
 				this.scrollPosition += size;
 				this.activePanel++;
 			}
