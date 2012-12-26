@@ -220,11 +220,11 @@
 		_buildSlider: function() {
 			var rotodex = this;
 
-			this.$slider = $("<div>").addClass('rotodex-slider');
-
-			if (typeof this.$slider.slider != 'function') {
+			if (!$.isFunction(this.$element.slider)) {
 				return; // This feature requires the jQuery UI plugin
 			}
+
+			this.$slider = $("<div>").addClass('rotodex-slider');
 
 			this.$slider.slider({
 				min: 0,
