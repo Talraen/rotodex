@@ -31,24 +31,23 @@
 
 	$.Rotodex.prototype = {
 		add: function(panel, position) {
-			$panel = $(panel);
-			if (typeof position == 'number') {
-				var $nextPanel = $(this.$list.children()[position]);
-			}
-
-			if (typeof position == 'number' && $nextPanel.length > 0) {
-				$nextPanel.before($panel);
+			if (panel.length > 1) {
+				for (var i = 0; i < panel.length; i++) {
+					this.add(panel[i], position + i);
+				}
 			} else {
-				this.$list.append($panel);
-			}
-			this._registerPanel($panel[0]);
-		},
+				$panel = $(panel);
+				if (typeof position == 'number') {
+					var $nextPanel = $(this.$list.children()[position]);
+				}
 
-		addMulti: function($panels, position) {
-			var rotodex = this;
-			$panels.each(function(index) {
-				rotodex.add($(this), position + index);
-			});
+				if (typeof position == 'number' && $nextPanel.length > 0) {
+					$nextPanel.before($panel);
+				} else {
+					this.$list.append($panel);
+				}
+				this._registerPanel($panel[0]);
+			}
 		},
 
 		empty: function() {
