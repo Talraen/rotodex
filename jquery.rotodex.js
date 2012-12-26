@@ -260,6 +260,8 @@
 			css[side] = 0;
 			css[anchor] = 0;
 			this.$slider.css(css);
+
+			this.refresh();
 		},
 
 		_create: function(options) {
