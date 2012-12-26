@@ -127,7 +127,14 @@
 		},
 
 		refresh: function() {
-			this._refreshSize();
+			this.size = this.options.orientation == 'horizontal' ? this.$element.width() : this.$element.height();
+			if (this.options.slider && this.$slider) {
+				if (this.options.orientation == 'horizontal') {
+					this.$slider.outerWidth(this.$element.width(), true);
+				} else {
+					this.$slider.outerHeight(this.$element.height(), true);
+				}
+			}
 		},
 
 		remove: function(position) {
@@ -258,7 +265,7 @@
 		_create: function(options) {
 			var rotodex = this;
 			this.options = $.extend(true, {}, $.Rotodex.settings, options);
-			this._refreshSize();
+			this.refresh();
 
 			this.scrollPosition = 0;
 			this.activePanel = -1;
@@ -281,7 +288,7 @@
 			}
 
 			this.select(this.options.selected);
-			this._refreshSize();
+			this.refresh();
 		},
 
 		_deregisterPanel: function(panel) {
@@ -369,17 +376,6 @@
 				return 0;
 			}
 			return this._listSize() - $.data($panels[$panels.length - 1], 'rotodex-size');
-		},
-
-		_refreshSize: function() {
-			this.size = this.options.orientation == 'horizontal' ? this.$element.width() : this.$element.height();
-			if (this.options.slider && this.$slider) {
-				if (this.options.orientation == 'horizontal') {
-					this.$slider.outerWidth(this.$element.width(), true);
-				} else {
-					this.$slider.outerHeight(this.$element.height(), true);
-				}
-			}
 		},
 
 		_registerPanel: function(panel) {
