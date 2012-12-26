@@ -32,11 +32,11 @@
 	$.Rotodex.prototype = {
 		add: function(panel, position) {
 			$panel = $(panel);
-			if (typeof(position) == 'number') {
+			if (typeof position == 'number') {
 				var $nextPanel = $(this.$list.children()[position]);
 			}
 
-			if (typeof(position) == 'number' && $nextPanel.length > 0) {
+			if (typeof position == 'number' && $nextPanel.length > 0) {
 				$nextPanel.before($panel);
 			} else {
 				this.$list.append($panel);
@@ -57,14 +57,14 @@
 		},
 
 		move: function(fromIndex, toIndex) {
-			if (typeof(fromIndex) != 'number') {
+			if (typeof fromIndex != 'number') {
 				fromIndex = this._getPanels().filter($(fromIndex)).index();
 				if (fromIndex == -1) {
 					return;
 				}
 			}
 
-			if (typeof(toIndex) != 'number') {
+			if (typeof toIndex != 'number') {
 				toIndex = this._getPanels().filter($(toIndex)).index();
 				if (toIndex == -1) {
 					return;
@@ -105,7 +105,7 @@
 			if ($.isPlainObject(key)) {
 				this.options = $.extend(true, this.options, key);
 
-				if (typeof(key.selected) != 'undefined') {
+				if (typeof key.selected != 'undefined') {
 					this.select(key.selected);
 				}
 			} else {
@@ -138,7 +138,7 @@
 		},
 
 		remove: function(position) {
-			if (typeof(position) == 'number') {
+			if (typeof position == 'number') {
 				removed = this.$list.children()[position];
 				if (removed) {
 					this._deregisterPanel(removed);
@@ -152,7 +152,7 @@
 		},
 
 		select: function(number) {
-			if (typeof(number) == 'number') {
+			if (typeof number == 'number') {
 				if (number < 0) {
 					number = 0;
 				} else if (number >= this.panels) {
@@ -173,7 +173,7 @@
 			this.$element.on('mousewheel.rotodex', function(event, delta, deltaX, deltaY) {
 				if (rotodex.options.mousewheel) {
 					// TODO: Determine why this event is being called multiple times
-					if (typeof(delta) == 'undefined') {
+					if (typeof delta == 'undefined') {
 						return; // This feature requires Brandon Aaron's mousewheel plugin
 					}
 
@@ -223,7 +223,7 @@
 
 			this.$slider = $("<div>").addClass('rotodex-slider');
 
-			if (typeof(this.$slider.slider) != 'function') {
+			if (typeof this.$slider.slider != 'function') {
 				return; // This feature requires the jQuery UI plugin
 			}
 
@@ -361,7 +361,7 @@
 		},
 
 		_listSize: function(listSize) {
-			if (typeof(listSize) == 'undefined') {
+			if (typeof listSize == 'undefined') {
 				return this.listSize || 0;
 			} else {
 				this.listSize = listSize;
@@ -554,7 +554,7 @@
 	};
 
 	$.fn.rotodex = function(options) {
-		if (typeof(options) == 'string') {
+		if (typeof options == 'string') {
 			var args = Array.prototype.slice.call(arguments, 1);
 
 			this.each(function() {
