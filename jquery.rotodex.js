@@ -170,7 +170,7 @@
 
 		_bindEvents: function() {
 			var rotodex = this;
-			this.$element.bind('mousewheel', function(event, delta, deltaX, deltaY) {
+			this.$element.on('mousewheel.rotodex', function(event, delta, deltaX, deltaY) {
 				if (rotodex.options.mousewheel) {
 					// TODO: Determine why this event is being called multiple times
 					if (typeof(delta) == 'undefined') {
@@ -203,12 +203,12 @@
 				}
 			});
 
-			this.$element.bind('touchstart', function(event) {
+			this.$element.on('touchstart.rotodex', function(event) {
 				if (rotodex.options.touch) {
 					event.preventDefault();
 					rotodex.lastTouch = rotodex.options.orientation == 'horizontal' ? event.originalEvent.touches[0].pageX : event.originalEvent.touches[0].pageY;
 				}
-			}).bind('touchmove', function(event) {
+			}).on('touchmove.rotodex', function(event) {
 				if (rotodex.options.touch) {
 					event.preventDefault();
 					var touch = rotodex.options.orientation == 'horizontal' ? event.originalEvent.touches[0].pageX : event.originalEvent.touches[0].pageY;
