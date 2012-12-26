@@ -320,7 +320,7 @@
 					rotodex._showPanel(panel);
 				}, this.options.delay);
 			} else {
-				this._showPanel();
+				this._showPanel(panel);
 			}
 		},
 
