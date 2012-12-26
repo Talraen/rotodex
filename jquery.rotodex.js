@@ -119,7 +119,7 @@
 			for (var i in staticOptions) {
 				if (currentOptions[staticOptions[i]] != this.options[staticOptions[i]]) {
 					this.options[staticOptions[i]] = currentOptions[staticOptions[i]];
-					console.log('Option "' + staticOptions[i] + '" cannot be changed after instantiation');
+					$.error('Attempted to change initialization option "' + staticOptions[i] + '"');
 				}
 			}
 
@@ -560,11 +560,11 @@
 			this.each(function() {
 				var instance = $.data(this, 'rotodex');
 				if (!instance) {
-					console.log('Cannot call rotodex method ' + options + ' prior to initialization');
+					$.error('Attempted to call rotodex method "' + options + '" prior to initialization');
 					return;
 				}
 				if (!$.isFunction(instance[options]) || options.charAt(0) == '_') {
-					console.log('Method "' + options + '" not found in rotodex instance');
+					$.error('Attempted to call nonexistant rotodex method "' + options + '"');
 					return;
 				}
 				instance[options].apply(instance, args);
