@@ -7,7 +7,7 @@
 	$.Rotodex = function(options, element) {
 		this.$element = $(element);
 
-		this._create(options);
+		this._init(options);
 		this._bindEvents();
 		if (this.options.slider) {
 			this._buildSlider();
@@ -53,7 +53,7 @@
 
 		empty: function() {
 			this.$list.remove();
-			this._create(this.options);
+			this._init(this.options);
 		},
 
 		move: function(fromIndex, toIndex) {
@@ -264,35 +264,6 @@
 			this.refresh();
 		},
 
-		_create: function(options) {
-			var rotodex = this;
-			this.options = $.extend(true, {}, $.Rotodex.settings, options);
-			this.refresh();
-
-			this.scrollPosition = 0;
-			this.activePanel = -1;
-			this.expandTimer = null;
-			this.lastTouch = 0;
-			this.panels = 0;
-			this.largest = 0;
-			this.sliderMax = 1000;
-
-			var $panels = this.$element.children().not(this.$slider);
-			this.$list = $('<div class="rotodex-list"></div>').append($panels);
-			this.$element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
-			this._updateScroll();
-
-			this._listSize(this.options.orientation == 'horizontal' ? 1000 : 0); // Make sure there is enough space for the first element to fully render, before list size is known
-
-			var $panels = this._getPanels();
-			for (var i = 0, panels = $panels.length; i < panels; i++) {
-				this._registerPanel($panels[i]);
-			}
-
-			this.select(this.options.selected);
-			this.refresh();
-		},
-
 		_deregisterPanel: function(panel) {
 			var $panel = $(panel);
 			var panelPosition = this._getPanelPosition($panel.index());
@@ -358,6 +329,35 @@
 
 		_getPanels: function() {
 			return this.$list.children();
+		},
+
+		_init: function(options) {
+			var rotodex = this;
+			this.options = $.extend(true, {}, $.Rotodex.settings, options);
+			this.refresh();
+
+			this.scrollPosition = 0;
+			this.activePanel = -1;
+			this.expandTimer = null;
+			this.lastTouch = 0;
+			this.panels = 0;
+			this.largest = 0;
+			this.sliderMax = 1000;
+
+			var $panels = this.$element.children().not(this.$slider);
+			this.$list = $('<div class="rotodex-list"></div>').append($panels);
+			this.$element.css({position: 'relative', overflow: 'hidden'}).append(this.$list);
+			this._updateScroll();
+
+			this._listSize(this.options.orientation == 'horizontal' ? 1000 : 0); // Make sure there is enough space for the first element to fully render, before list size is known
+
+			var $panels = this._getPanels();
+			for (var i = 0, panels = $panels.length; i < panels; i++) {
+				this._registerPanel($panels[i]);
+			}
+
+			this.select(this.options.selected);
+			this.refresh();
 		},
 
 		_listSize: function(listSize) {
@@ -568,7 +568,7 @@
 					return;
 				}
 				instance[options].apply(instance, args);
-			})
+			});
 		} else {
 			this.each(function() {
 				var instance = $.data(this, 'rotodex');
