@@ -299,8 +299,6 @@
 		_getActivePanel: function() {
 			if (this.activePanel >= 0) {
 				return this._getPanels()[this.activePanel];
-			} else {
-				return false;
 			}
 		},
 
@@ -433,12 +431,12 @@
 			this._updateScroll();
 
 			var rotodex = this;
-			$panel.click(function() {
+			$panel.click(function(event) {
 				if (rotodex.options.clickable) {
 					var number = $(this).index();
 					if (rotodex.activePanel != number) {
+						event.preventDefault();
 						rotodex.select(number);
-						return false;
 					}
 				}
 			});
